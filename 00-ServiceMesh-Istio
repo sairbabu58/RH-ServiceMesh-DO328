@@ -71,8 +71,21 @@ The data plane in a service mesh performs the following tasks:
 
 
 Control Plane Components:
+
 The control plane manages the configuration and policies for the service mesh. The control plane does not directly handle the network traffic in the mesh, 
 but maintains configuration and policies that are enforced by the data plane.
+The control plane consists of the istiod deployment. The istiod deployment consists of a single binary that contains a number of APIs used by the OpenShift Service Mesh.
+
+Pilot:
+Maintains the configuration data for the service mesh. Pilot provides service discovery for the Envoy proxy sidecars, traffic management capabilities for 
+intelligent routing (for example, A/B tests), and resiliency (timeouts, retries, and circuit breakers).
+
+Citadel:
+Issues and rotates TLS certificates. Citadel provides authentication for inter-service communication, with built-in identity and credential management. 
+You can enforce policies based on service identity rather than relying on network details such as IP addresses and host names.
+
+Galley:
+Monitors the service mesh configuration and then validates, processes, and distributes the configuration to the proxies.
 
 
 
