@@ -1,0 +1,79 @@
+Red Hat OpenShift Service Mesh:
+Red Hat OpenShift Service Mesh is a service mesh implementation for the Red Hat OpenShift Container Platform. OpenShift Service Mesh complements OpenShift Container 
+Platform capabilities, adding many of the desired features of microservice architectures.
+OpenShift Service Mesh incorporates and extends several open source projects and orchestrates them to provide an improved developer experience:
+
+.....
+
+Istio:
+Istio is the core implementation of the service mesh architecture for the Kubernetes platform. Istio creates a control plane that centralizes service mesh capabilities 
+and a data plane that creates the structure of the mesh.
+The data plane controls communications between services by injecting sidecar containers that capture traffic between microservices.
+
+Maistra:
+Maistra is an open-source project based on Istio that adapts Istio features to the edge cases of deployment in OpenShift Container Platform. Maistra also adds extended 
+features to Istio, such as simplified multitenancy, explicit sidecar injection, and the use of OpenShift routes instead of Kubernetes ingress.
+
+Jaeger:
+Jaeger is an open source traceability server that centralizes and displays traces associated with a single request. A trace contains information about all services that a request 
+reached. Maistra is responsible for sending the traces to Jaeger and Jaeger is responsible for displaying traces. Microservices in the mesh are responsible for generating 
+request headers needed for other components to generate and aggregate traces.
+
+ElasticSearch:
+ElasticSearch is an open source, distributed, JSON-based search and analytics engine. Jaeger uses ElasticSearch for storing and indexing the tracing data. 
+ElasticSearch is an optional component for Red Hat OpenShift Service Mesh.
+
+Kiali and Prometheus:
+Kiali provides service mesh observability. Kiali discovers microservices in the service mesh and their interactions and visually represents them. 
+It also captures information about communication and services, such as the protocols used, service versions, and failure statistics.
+Prometheus is used by OpenShift Service Mesh to store telemetry information from services. Kiali depends on Prometheus to obtain metrics, health status, and mesh topology.
+
+Grafana:
+Optionally, Grafana can be used to analyze service mesh metrics. Grafana provides mesh administrators with advanced query and metrics analysis.
+
+3scale:
+The 3scale Istio adapter is an optional component that integrates OpenShift Service Mesh with Red Hat 3scale API Management solutions. The default OpenShift Service Mesh 
+installation does not include this component.
+
+
+......
+
+Red Hat OpenShift Service Mesh Architecture:
+
+Red Hat OpenShift Service Mesh consists of two logical components, a control plane, and a data plane. The following diagram shows the components in the 
+- data plane
+- control plane
+
+Data Plane Components:
+The data plane consists of:
+- A set of Envoy proxies.
+- The istio-agent component running in each Envoy proxy.
+
+The Envoy proxy is the main component in the data plane. It handles all data flowing between the services in a service mesh. 
+The Envoy proxy also collects all metrics related to the services in the mesh.
+
+The istio-agent component, known also as the Istio Pilot agent, is part of every Envoy proxy. It helps to bootstrap the Envoy proxy container during startup. 
+Additionally, it maintains other functions, 
+
+such as:
+- Automating certificate rotation by communicating with the control plane components.
+- Automating routing information.
+- Automating DNS domain configuration.
+
+The data plane in a service mesh performs the following tasks:
+- Service discovery: Tracks the services deployed in a mesh.
+- Health checks: Track the state (healthy or unhealthy) of the services deployed in a mesh.
+- Traffic shaping and routing: Control the flow of network data between services. Includes tasks such as throttling the amount of traffic, routing based on content, 
+  circuit breaking, controlling the amount of traffic that should be routed among multiple versions of a service, load balancing and more.
+- Security: Perform authentication and authorization, and secure communication using mutual transport layer security (mTLS) between services in a mesh.
+- Metrics and Telemetry: Gather metrics, logs, and distributed tracing information from services in the mesh.
+
+
+
+Control Plane Components:
+The control plane manages the configuration and policies for the service mesh. The control plane does not directly handle the network traffic in the mesh, 
+but maintains configuration and policies that are enforced by the data plane.
+
+
+
+
