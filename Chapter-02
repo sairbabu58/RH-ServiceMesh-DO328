@@ -27,6 +27,8 @@ Provides observability to the service mesh through a web user interface (UI).
  $ oc get csv
  $ oc get servicemeshcontrolplane , oc get smcp
  $ oc get servicemeshmemberroll   , oc get smmr
+ $ oc get route
+
 
 
 
