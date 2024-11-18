@@ -1,1 +1,22 @@
+Add project to Istio member roll
+
+$ oc patch servicemeshmemberroll/default -n istio-system --type=merge -p '{"spec": {"members": ["metrics"]}}'
+
+or 
+
+$ oc edit smmr -n istio-system 
+   - project-name
+
+...
+
+Monitor the application, Please add extra annotation on the deployment file.
+
+annotations:
+  sidecar.istio.io/inject: "true"
+  prometheus.io/scrape: "true"   <<<--- this
+  prometheus.io/port: "8080"    <<<--- this
+  prometheus.io/scheme: "http"  <<<--- this
+
+...
+
 
