@@ -22,3 +22,13 @@ spec:
           image: quay.io/redhattraining/ossm-history:1.0
 ...
 
+
+Envoy Sidecar are 2 types.
+- Ingress side card
+- Egress side card
+
+$ oc get deployment -n istio-system
+  - istio-ingressgateway
+  - istio-ingressgateway
+
+
