@@ -31,4 +31,7 @@ $ oc get deployment -n istio-system
   - istio-ingressgateway
   - istio-ingressgateway
 
+$ oc get route -n istio-system
+  you will find ingress gateway 
+
 
