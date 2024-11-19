@@ -22,8 +22,12 @@ Provides observability to the service mesh through a web user interface (UI).
 2) Install Elasticsearch Operator 
 3) Install Kiali Operator 
 4) Install OpenShift Service Mesh Operator 
+
 5) Create Service Mesh Control Plane (Default values)
-6) Create Service Mesh Member Roll (Default values, remove the NS list)
+
+6) Create Service Mesh Member Roll
+   ( Default values, remove the NS list, later we can add the project name )
+
  $ oc get csv
  $ oc get servicemeshcontrolplane , oc get smcp
  $ oc get servicemeshmemberroll   , oc get smmr
