@@ -35,3 +35,37 @@ $ oc get route -n istio-system
   you will find ingress gateway 
 
 
+.....
+
+
+Pratical.
+
+
+1) Create a NS hello
+
+2) Add ns to smmr 
+spec:
+  members:
+  - hello
+
+3) Deploy the application (Deployment and service)
+4) Add istio side card to your deployment.
+
+...
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: history
+      annotations:
+        sidecar.istio.io/inject: "true"
+    spec:
+      containers:
+...
+
+5) 
+
+
+
+
