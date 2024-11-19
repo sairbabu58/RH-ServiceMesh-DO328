@@ -1,1 +1,24 @@
 
+# Inject istio side card.
+
+# Inject istio side card to application.
+# Inject istio side card to namespace.
+
+sidecar.istio.io/inject=true
+
+Deployment:
+...
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: history
+      annotations:
+        sidecar.istio.io/inject: "true"
+    spec:
+      containers:
+        - name: history
+          image: quay.io/redhattraining/ossm-history:1.0
+...
+
