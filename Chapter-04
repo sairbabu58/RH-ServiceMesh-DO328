@@ -4,7 +4,14 @@
 # Inject istio side card to application.
 # Inject istio side card to namespace.
 
+# Create gataway
+# Create virtualservice
+
+...
+
 sidecar.istio.io/inject=true
+
+...
 
 Deployment:
 ...
