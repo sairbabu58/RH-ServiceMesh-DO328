@@ -33,6 +33,16 @@ Provides observability to the service mesh through a web user interface (UI).
  $ oc get servicemeshmemberroll   , oc get smmr
  $ oc get route
 
+......
+pods list:
+
+- Grafana 2/2
+- istio-egressgateway 1/1
+- istio-ingressgateway 1/1
+- istiod-basic 1/1
+- jaeger 1/1
+- kiali 1/1
+- prometheus 3/3
 
 
 
