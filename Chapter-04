@@ -1,8 +1,12 @@
 
-# Inject istio side card.
+# Inject istio sidecar.
 
-# Inject istio side card to application.
 # Inject istio side card to namespace.
+# Inject istio side card to application.
+
+Note: ServiceMesh does not automatically inject the sidevar into everypod. you must specify which pods or applications must be managed by serviceMesh. for this add additional annotations on the deployment.
+
+
 
 # Create gataway
 # Create virtualservice
