@@ -40,7 +40,7 @@ pods list:
 - istio-egressgateway 1/1
 - istio-ingressgateway 1/1
 - istiod-basic 1/1
-- jaeger 1/1
+- jaeger 2/2
 - kiali 1/1
 - prometheus 3/3
 
