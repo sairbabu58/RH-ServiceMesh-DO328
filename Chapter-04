@@ -52,12 +52,20 @@ $ oc get route -n istio-system
 Pratical.
 
 
-1) Create a NS hello
+1) Create a new project
+$ oc new-project hello
+$ oc describe ns hello
 
 2) Add ns to smmr 
+$ oc get smmr (0/0)
+$ oc edit smmr -n istio-system
 spec:
   members:
   - hello
+
+$ oc get smmr (1/1)
+$ oc describe smmr -n istio-system
+$ oc describe ns hello
 
 3) Deploy the application (Deployment and service)
 4) Add istio side card to your deployment.
