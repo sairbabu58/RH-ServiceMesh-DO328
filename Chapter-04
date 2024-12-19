@@ -178,7 +178,229 @@ spec:
 ................................... end-01 .....................................
 
 
-- 
 
+.................................. start-02 ....................................
+- Create project 
+- Add to smmr
+- Deploy applications (two application v1 and v2)
+- Create gateway     
+- Create simple virtual service 
+- Create destinationrule
+- Create virtual servce to call always v1 version
+- Create a virtual service to call based on header
+
+
+...
+
+1- $ oc new-project headers
+2- $ oc patch servicemeshmemberroll/default -n istio-system --type=merge -p '{"spec": {"members": ["headers"]}}'
+3- $ oc apply -f application.yaml 
+...
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: headers-v1
+  labels:
+    app: headers
+    version: v1
+spec:
+  selector:
+    matchLabels:
+      app: headers
+      version: v1
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: headers
+        version: v1
+      annotations:
+        sidecar.istio.io/inject: "true"
+    spec:
+      containers:
+        - name: headers
+          image: quay.io/redhattraining/ossm-maven-simplest:1.0
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: headers-v2
+  labels:
+    app: headers
+    version: v2
+spec:
+  selector:
+    matchLabels:
+      app: headers
+      version: v2
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: headers
+        version: v2
+      annotations:
+        sidecar.istio.io/inject: "true"
+    spec:
+      containers:
+        - name: headers
+          image: quay.io/redhattraining/ossm-maven-simplest:2.0
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: headers
+  name: headers
+spec:
+  ports:
+    - name: http
+      port: 8080
+  selector:
+    app: headers
+---
+...
+4- Create gataway: (default gataway, access via istio-ingress or new ingress name -n istio-system)
+$ oc apply -f gataway.yaml
+...
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: headers-gateway
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - "*"
+...
+5- Create simple virtualservice (As we have 2 application v1, v2 the curl outpull will come "hello world..| hello redhat..)
+$ oc apply -f virtualservice.yaml
+...
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: headers-vs
+spec:
+  hosts:
+    - "*"
+  gateways:
+    - headers-gateway
+  http:
+    - match:
+        - uri:
+            prefix: /headers
+      rewrite:
+        uri: /
+      route:
+        - destination:
+            host: headers
+            port:
+              number: 8080
+...
+$ curl istio-ingressgateway-istio-system.apps.ocp4.example.com/headers
+
+6- Create a destinationrule (Subsets for your application label v1 and v2 )
+$ oc apply -f destiationrule.yaml 
+...
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: headers
+spec:
+  host: headers
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  - name: v2
+    labels:
+      version: v2
+...
+
+7- Now create a new virtualservice(delete old one) to call only v1 application
+$ oc apply -f virtual-service-v1.yaml
+...
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: headers-vs-1
+spec:
+  hosts:
+    - "*"
+  gateways:
+    - headers-gateway
+  http:
+    - match:
+        - uri:
+            prefix: /headers
+      route:
+        - destination:
+            host: headers
+            subset: v1
+...
+$ curl istio-ingressgateway-istio-system.apps.ocp4.example.com/headers
+hello world..
+hello world..
+
+
+8- Now create a new virtualservice(remove old one) to call header based v2 rest of call will go v1
+$ oc apply -f virtual-service-header.yaml
+...
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: headers-vs
+spec:
+  hosts:
+    - "*"
+  gateways:
+    - headers-gateway
+  http:
+    - match:
+        - uri:
+            prefix: /headers
+          headers:
+            end-user:
+              exact: redhatter
+      route:
+        - destination:
+            host: headers
+            subset: v2
+    - match:
+        - uri:
+            prefix: /headers
+      route:
+        - destination:
+            host: headers
+            subset: v1
+...
+
+$ curl curl -H "end-user: redhatter" istio-ingressgateway-istio-system.apps.ocp4.example.com/headers
+hello redhat..
+hello redhat..
+
+$ curl istio-ingressgateway-istio-system.apps.ocp4.example.com/headers
+hello world..
+hello world..
+
+
+$ curl curl -H "end-user: any-other-name" istio-ingressgateway-istio-system.apps.ocp4.example.com/headers
+hello world..
+hello world..
+
+9- Open the kiali dashboard and see the traffic flow 
+
+...................................... end-02 .....................................................
 
 
