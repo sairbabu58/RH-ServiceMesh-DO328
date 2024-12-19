@@ -43,11 +43,7 @@ $ oc get route -n istio-system
   you will find ingress gateway 
 
 
-.....
-
-
-Pratical.
-
+........................................ Start-01 ................................................
 
 1) Create a new project
 $ oc new-project hello
@@ -135,7 +131,7 @@ $ curl -v http://istio-ingressgateway-istio-system.apps.ocp4.example.com
 8) Find the trafic flow from kiali.
 
 
-................................... end .....................................
+................................... end-01 .....................................
 
 
 
