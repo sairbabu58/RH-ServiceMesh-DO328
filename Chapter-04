@@ -67,7 +67,7 @@ $ oc get smmr (1/1)
 $ oc describe smmr -n istio-system
 $ oc describe ns hello
 
-3) Deploy the application (Deployment and service)
+3) Deploy the application (Deployment and service | apply the below yaml file)
 4) Add istio side card to your deployment.
 
 ...
@@ -82,6 +82,63 @@ spec:
     spec:
       containers:
 ...
+
+5) Create the gateway 
+$ oc get gataway
+
+$ oc get route -n istio-system
+
+...
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: hello-gateway
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - "*"   #<<---- '*' it will  create dynamic name. else 'hello.apps.ocp4.example.com'
+...
+
+6) Create VirtualService (Virtual service is for map SVC, PORT and multiple PATH)
+$ oc get  virtualservic
+ 
+NAME       GATEWAYS            HOSTS   AGE
+hello-vs   ["hello-gateway"]   ["*"]   18h
+
+...
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: hello-vs
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - hello-gateway
+  http:
+  - route:
+    - destination:
+        host: hello   #<--- oc get svc 'name'
+        port:
+          name: http-8080 #<--- oc edi svc 'ports name'
+          number: 8080    #<--- oc edi svc 'ports port'
+...
+
+7) Access the application
+$ oc get route -n istio-system
+$ curl -v http://hello-hello-gateway-525eca1d5089dbdc-istio-system.apps.ocp4.example.com
+$ curl -v http://istio-ingressgateway-istio-system.apps.ocp4.example.com
+
+8) Find the trafic flow from kiali.
+
+
+................................... end .....................................
 
 
 
