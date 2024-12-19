@@ -131,9 +131,15 @@ $ curl -v http://istio-ingressgateway-istio-system.apps.ocp4.example.com
 8) Find the trafic flow from kiali.
 
 
+
+Example: Yaml 
+
+
+
 ................................... end-01 .....................................
 
 
+- 
 
 
 
