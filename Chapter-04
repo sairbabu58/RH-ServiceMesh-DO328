@@ -1,15 +1,12 @@
 
 # Inject istio sidecar.
-
 # Inject istio side card to namespace.
 # Inject istio side card to application.
-
 Note: ServiceMesh does not automatically inject the sidevar into everypod. you must specify which pods or applications must be managed by serviceMesh. for this add additional annotations on the deployment.
 
-
-
-# Create gataway
-# Create virtualservice
+# Create gataway (Ingress url, access point or gateway to access your application. Example below)
+# Create virtualservice (Pointing to SVC, Port to access your application | rule based access, like end-user: redhatter -> pointion to svc/v2, and all other users pointing to svc/v1. Example below)
+# Create Destination Rules (Create a rules for traffic reroute, some of svc "Round_Robing" or "Random" or "Weighted" or "Least Request")
 
 ...
 
