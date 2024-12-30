@@ -8,6 +8,10 @@ Note: ServiceMesh does not automatically inject the sidecar into everypod. you m
 # Create virtualservice (Pointing to SVC, Port to access your application | rule based access, like end-user: redhatter -> pointion to svc/v2, and all other users pointing to svc/v1. Example below)
 # Create Destination Rules (Create a rules for traffic reroute, "Round_Robing" or "Random" or "Weighted" or "Least Request" based on the application version label match)
 
+(Doubt )
+# ServiceEntry (Access external application from some other NS or outside | Egress)
+By default ServiceMesh allowed everything ALLOW_ANY, value REGISTRY_ONLY for block everything 
+
 ...
 
 sidecar.istio.io/inject=true
