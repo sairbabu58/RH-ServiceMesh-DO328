@@ -413,5 +413,7 @@ ServiceEntry for egress:
 
 
 $ oc patch smcp basic --type merge -n istio-system -p '{"spec":{"proxy":{"networking":{"trafficControl":{"outbound":{"policy":"REGISTRY_ONLY"}}}}}}'
+$ create NS external-ns-app and deploy the application with route
+$ Access external application from internal-ns project
 
 
