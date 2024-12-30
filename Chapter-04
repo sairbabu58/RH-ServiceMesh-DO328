@@ -99,7 +99,7 @@ spec:
 ...
 
 6) Create VirtualService (Virtual service is for map SVC, PORT and multiple PATH)
-$ oc get  virtualservic
+$ oc get  virtualservice
  
 NAME       GATEWAYS            HOSTS   AGE
 hello-vs   ["hello-gateway"]   ["*"]   18h
