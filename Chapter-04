@@ -408,3 +408,10 @@ hello world..
 ...................................... end-02 .....................................................
 
 
+
+ServiceEntry for egress:
+
+
+$ oc patch smcp basic --type merge -n istio-system -p '{"spec":{"proxy":{"networking":{"trafficControl":{"outbound":{"policy":"REGISTRY_ONLY"}}}}}}'
+
+
