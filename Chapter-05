@@ -11,6 +11,7 @@
 - Mirror the application 100% to v2 application
 - Mirror the application 10% to v2 application
 - Release the v2 application
+- Everything is configured on VirtualService
 - Validate the traffic route details from Grafana dashboard
 
 troubleshoot:
