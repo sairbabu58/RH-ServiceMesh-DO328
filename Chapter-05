@@ -21,7 +21,7 @@ troubleshoot:
 
 - From Kiali App adjust the weight > service > select service > adjust the weight
 
-...............................................Start-01...............................................
+................................... Start Canary Deployment  .................................
 1) Create and apply v-1 application.
 ...
 apiVersion: apps/v1
@@ -264,3 +264,16 @@ spec:
 16- Curl the application
 17- Moniter the app details from Kiali dashboard.
 
+
+...............................  End Canary Deplotment ................................
+
+
+
+............................... Start Mirror Luncher ....................................
+
+1) Create a new project
+2) Add project to SMMR
+3) Deploy the v1 application, svc, gateway, dr, vs
+...
+
+...
