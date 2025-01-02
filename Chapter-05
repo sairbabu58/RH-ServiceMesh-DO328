@@ -6,6 +6,12 @@
 - Create virtualservice
 - Create destinationrule
 - Access and validate the application from kiali
+...
+- Mirror Launchs or Dark Launches(traffic mirroring)
+- Mirror the application 100% to v2 application
+- Mirror the application 10% to v2 application
+- Release the v2 application
+- Validate the traffic route details from Grafana dashboard
 
 troubleshoot:
 - Check the service tab from kiali
