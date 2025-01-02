@@ -1,0 +1,259 @@
+- ServiceMesh Canary deployment (v1 70%, v2 30% | v1 30%, v2 70% | v1 0%, v2 100%)
+- Create a NS and add to SMMR
+- Create deployment v1, v2, v3 (stage by stage | add the istio annotation)
+- Create service
+- Create gateway
+- Create virtualservice
+- Create destinationrule
+- Access and validate the application from kiali
+
+troubleshoot:
+- Check the service tab from kiali
+- Check all the app having istio enjection or not
+
+
+- From Kiali App adjust the weight > service > select service > adjust the weight
+
+...............................................Start-01...............................................
+1) Create and apply v-1 application.
+...
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vertx-greet-v1
+spec:
+  selector:
+    matchLabels:
+      app: vertx-greet
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: vertx-greet
+        version: v1
+      annotations:
+        sidecar.istio.io/inject: "true"
+    spec:
+      containers:
+        - name: vertx-greet
+          image: quay.io/redhattraining/ossm-vertx-greet:1.0
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+...
+2- Create and apply service for v1 application
+...
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: vertx-greet
+  name: vertx-greet
+spec:
+  ports:
+    - name: http
+      port: 8080
+  selector:
+    app: vertx-greet
+...
+3- Create and apply gateway 
+...
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: vertx-greet-gateway
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - "*"
+...
+4. Apply virtual service 
+...
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: vertx-greet
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - vertx-greet-gateway
+  http:
+  - route:
+    - destination:
+        host: vertx-greet
+        port:
+          number: 8080
+...
+5- Access the application
+$ oc get route -n istio-system (if it is not work, please apply the destinationrule)
+
+hello world
+
+
+...
+7- Create and apply v2 application
+...
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vertx-greet-v2
+spec:
+  selector:
+    matchLabels:
+      app: vertx-greet
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: vertx-greet
+        version: v2
+      annotations:
+        sidecar.istio.io/inject: "true"
+    spec:
+      containers:
+        - name: vertx-greet
+          image: quay.io/redhattraining/ossm-vertx-greet:1.0
+          ports:
+            - containerPort: 8080
+          env:
+          - name: GREETING
+            value: "Hello Red Hat!"
+...
+8- $ oc get ep (v1 and v2 pods ip addr)
+...
+9- Create a destinationrule
+...
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: vertx-greet
+spec:
+  host: vertx-greet
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  - name: v2
+    labels:
+      version: v2
+...
+
+10- Update the virtualservice configuration file
+...
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: vertx-greet
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - vertx-greet-gateway
+  http:
+  - route:
+    - destination:
+        host: vertx-greet
+        subset: v1
+        port:
+          number: 8080
+      weight: 80
+    - destination:
+        host: vertx-greet
+        subset: v2
+        port:
+          number: 8080
+      weight: 20
+...
+11- Monitor the graph from Kiali dashboard
+...
+13- (optional) Create a v3 application
+...
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vertx-greet-v3
+spec:
+  selector:
+    matchLabels:
+      app: vertx-greet
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: vertx-greet
+        version: v3
+      annotations:
+        sidecar.istio.io/inject: "true"
+    spec:
+      containers:
+        - name: vertx-greet
+          image: quay.io/redhattraining/ossm-vertx-greet:1.0
+          ports:
+            - containerPort: 8080
+          env:
+          - name: GREETING
+            value: "Hello v3!"
+          - name: MAX_REQUESTS_PER_SECOND
+            value: "1"
+...
+14- Add the v3 details on destinationrule
+...
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: vertx-greet
+spec:
+  host: vertx-greet
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  - name: v2
+    labels:
+      version: v2
+  - name: v3
+    labels:
+      version: v3
+...
+15- Add the v3 details on virtualservice
+...
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: vertx-greet
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - vertx-greet-gateway
+  http:
+  - route:
+    - destination:
+        host: vertx-greet
+        subset: v1
+        port:
+          number: 8080
+      weight: 10
+    - destination:
+        host: vertx-greet
+        subset: v2
+        port:
+          number: 8080
+      weight: 45
+    - destination:
+        host: vertx-greet
+        subset: v3
+        port:
+          number: 8080
+      weight: 45
+...
+16- Curl the application
+17- Moniter the app details from Kiali dashboard.
+
