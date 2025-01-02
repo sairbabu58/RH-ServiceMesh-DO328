@@ -275,5 +275,253 @@ spec:
 2) Add project to SMMR
 3) Deploy the v1 application, svc, gateway, dr, vs
 ...
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vertx-greet-v1
+spec:
+  selector:
+    matchLabels:
+      app: vertx-greet
+      version: v1
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: vertx-greet
+        version: v1
+      annotations:
+        sidecar.istio.io/inject: "true"
+    spec:
+      containers:
+        - name: vertx-greet
+          image: quay.io/redhattraining/ossm-vertx-greet:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: vertx-greet
+  name: vertx-greet
+spec:
+  ports:
+    - name: http
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    app: vertx-greet
+---
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: vertx-greet-gateway
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - "*"
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: vertx-greet
+  labels:
+    kiali_wizard: weighted_routing
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - vertx-greet-gateway
+  http:
+  - route:
+    - destination:
+        host: vertx-greet
+        subset: v1
+        port:
+          number: 8080
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: vertx-greet
+  labels:
+    kiali_wizard: weighted_routing
+spec:
+  host: vertx-greet
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+...
+4-  Access the application every 0.5 seconds
+ $ GATEWAY_URL=$(oc get route istio-ingressgateway -n istio-system -o jsonpath='{.spec.host}')
+ $ watch -p -n0.5 curl -s $GATEWAY_URL
+
+5- Monitor the traffic from Grafana dashboard
+  -> oc get rouute -n istio-system -> URL over Browser -> Dashboard -> Manage -> Istio -> Istio Workload Dashboard -> Namespace: your-NS -> Workload: V1 Application name
+ Output ref: 2 OPS  | 100%
+
+6- Deploy the v2 applicarion 
 
 ...
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vertx-greet-v2
+spec:
+  selector:
+    matchLabels:
+      app: vertx-greet
+      version: v2
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: vertx-greet
+        version: v2
+      annotations:
+        sidecar.istio.io/inject: "true"
+    spec:
+      containers:
+        - name: vertx-greet
+          image: quay.io/redhattraining/ossm-vertx-greet:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+          - name: GREETING
+            value: "Hola Mundo!"
+...
+7- Add v2 application label on DR 
+
+...
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: vertx-greet
+  labels:
+    kiali_wizard: weighted_routing
+spec:
+  host: vertx-greet
+  subsets:
+  - labels:
+      version: v1
+    name: v1
+  - labels:
+      version: v2
+    name: v2
+...
+
+8- Mirror the v1 traffic to v2 100%
+
+...
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: vertx-greet
+  labels:
+    kiali_wizard: weighted_routing
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - vertx-greet-gateway
+  http:
+  - route:
+    - destination:
+        host: vertx-greet
+        subset: v1
+        port:
+          number: 8080
+    mirror:
+      host: vertx-greet
+      subset: v2
+...
+
+9- Monitor the traffic from Grafana dashboard
+  -> oc get rouute -n istio-system -> URL over Browser -> Dashboard -> Manage -> Istio -> Istio Workload Dashboard -> Namespace: your-NS -> Workload: V1 Application name
+ Output ref: 2 OPS  | 100%
+
+  Monitor the traffic from Grafana dashboard
+  -> oc get rouute -n istio-system -> URL over Browser -> Dashboard -> Manage -> Istio -> Istio Workload Dashboard -> Namespace: your-NS -> Workload: V2 Application name
+ Output ref: 2 OPS  | 100%
+...
+
+10- Mirror only 10% traffice 
+
+...
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: vertx-greet
+  labels:
+    kiali_wizard: weighted_routing
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - vertx-greet-gateway
+  http:
+  - mirror:
+      host: vertx-greet
+      subset: v2
+    mirror_percent: 10
+    route:
+    - destination:
+        host: vertx-greet
+        subset: v1
+        port:
+          number: 8080
+...
+
+11- Monitor the traffic from Grafana dashboard
+  -> oc get rouute -n istio-system -> URL over Browser -> Dashboard -> Manage -> Istio -> Istio Workload Dashboard -> Namespace: your-NS -> Workload: V1 Application name
+ Output ref: 2 OPS  | 100%
+
+  Monitor the traffic from Grafana dashboard
+  -> oc get rouute -n istio-system -> URL over Browser -> Dashboard -> Manage -> Istio -> Istio Workload Dashboard -> Namespace: your-NS -> Workload: V2 Application name
+ Output ref: 0.20 OPS  | 100%
+...
+
+12- Finally reroute all the traffic to v2 application
+
+...
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  generation: 4
+  labels:
+    kiali_wizard: weighted_routing
+  name: vertx-greet
+  namespace: release-dark
+spec:
+  gateways:
+  - vertx-greet-gateway
+  hosts:
+  - '*'
+  http:
+  - route:
+    - destination:
+        host: vertx-greet
+        port:
+          number: 8080
+        subset: v2
+...
+13- Monitor the traffic from Grafana dashboard
+  -> oc get rouute -n istio-system -> URL over Browser -> Dashboard -> Manage -> Istio -> Istio Workload Dashboard -> Namespace: your-NS -> Workload: V1 Application name
+ Output ref: 0 OPS  | 100%
+
+  Monitor the traffic from Grafana dashboard
+  -> oc get rouute -n istio-system -> URL over Browser -> Dashboard -> Manage -> Istio -> Istio Workload Dashboard -> Namespace: your-NS -> Workload: V2 Application name
+ Output ref: 2 OPS  | 100%
+...
+
