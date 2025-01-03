@@ -1,19 +1,45 @@
 
-
-
+- Throwing HTTP Errors, Chaos Testing
+- Creating Delays in Services
 
 
 - VirtualService.yaml
+...
+apiVersion: networking.istio.io/v1beta1
+  kind: VirtualService
+  metadata:
+    name: example-vs
+  spec:
+    hosts:
+    - example-svc
+    http:
+    - route:
+      - destination:
+          host: example-svc
+          subset: v1
+      fault: 
+        abort: 
+          percentage: 
+            value: 50.0
+          httpStatus: 500 
+...
 
+...
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: example-vs
 spec:
   hosts:
-  - recommendation
+  - example-svc
   http:
   - route:
     - destination:
-        host: recommendation
-    fault:
-      abort:
-        httpStatus: 500
-        percentage:
-          value: 50.0
+        host: example-svc
+        subset: v1
+    fault: 
+      delay: 
+        percentage: 
+          value: 50
+        fixedDelay: 7s 
+...
