@@ -1,1 +1,19 @@
 
+
+
+
+
+- VirtualService.yaml
+
+spec:
+  hosts:
+  - recommendation
+  http:
+  - route:
+    - destination:
+        host: recommendation
+    fault:
+      abort:
+        httpStatus: 500
+        percentage:
+          value: 50.0
